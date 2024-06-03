@@ -1,0 +1,35 @@
+{
+    "name": "cat4year/svg-reuser",
+    "description": "A tool to collect and reuse SVG as links",
+    "license": "MIT",
+    "type": "application",
+    "keywords": [
+        "optimize svg",
+        "optimize code",
+        "optimize html"
+    ],
+    "authors": [
+        {
+            "name": "cat4year",
+            "email": "cat4year@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "SvgReuser\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "SvgReuser\\Tests\\": "tests/"
+        }
+    },
+    "require": {
+        "php": "^8.2",
+        "ext-dom": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.1",
+        "enshrined/svg-sanitize": "^0.18.0"
+    }
+}
