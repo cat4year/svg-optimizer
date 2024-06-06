@@ -24,7 +24,7 @@ readonly class Svg
         return $this->class;
     }
 
-    public function getAnchor(): string
+    public function getUse(): string
     {
         $classHtml = $this->getClass() !== null ? sprintf('class="%s"', $this->getClass()) : '';
 

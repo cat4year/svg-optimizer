@@ -29,10 +29,10 @@ class SvgStorage implements SvgStorageInterface
         $this->storage[$id] = $svg;
     }
 
-    public function getAll(string $class = null): string
+    public function getSprite(string $class = null): string
     {
         $classHtml = $class !== null ? sprintf('class="%s"', $class) : '';
-        $result = sprintf('<svg %s xmlns="http://www.w3.org/2000/svg">', $classHtml);
+        $result = sprintf('<svg %s>', $classHtml);
 
         foreach ($this->storage as $svg) {
             $result .= $svg->getSymbol();
@@ -51,6 +51,6 @@ class SvgStorage implements SvgStorageInterface
 
         $svg = $this->storage[$id];
 
-        return $svg->getAnchor();
+        return $svg->getUse();
     }
 }
