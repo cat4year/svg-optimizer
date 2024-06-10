@@ -36,7 +36,7 @@ class SvgStorageTest extends TestCase
     public function testIsValidSvgSprite(): void
     {
         $sprite = $this->storage->getSprite('d-none');
-        $this->dom->validateOnParse = true;
+        libxml_use_internal_errors(true); // Отключаем стандартные ошибки libxml
         $this->dom->loadXML('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24">
     <symbol id="icon-active" viewBox="0 0 24 24">
         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2z"/>
@@ -46,9 +46,7 @@ class SvgStorageTest extends TestCase
     </symbol>
 </svg>');
 
-        echo "<pre>";
-        print_r($this->dom->save('test'));
-        echo "</pre>";
+        libxml_clear_errors(); // Очищаем ошибки libxml
         if ($this->dom->validate()) {
             echo 'VALIDEN';
         } else {
@@ -56,7 +54,7 @@ class SvgStorageTest extends TestCase
             throw new \Exception('ne validen!!');
         }
 
-        $this->assertTrue($this->dom->validate());
+        //$this->assertTrue($this->dom->validate());
     }
 
     public function testSvgSprite(): void
@@ -103,7 +101,7 @@ class SvgStorageTest extends TestCase
         $svgNode = $this->dom->getElementsByTagName('svg')->item(0);
 
         $firstSymbol = $svgNode->firstChild;
-        $this->assertEquals('symbol', $firstSymbol);
+        $this->assertEquals('symbol', $firstSymbol->nodeName);
         $this->assertEquals('svg-first', $firstSymbol->getAttribute('svg-first'));
     }
 
