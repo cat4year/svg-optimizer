@@ -37,17 +37,21 @@ class SvgStorageTest extends TestCase
     {
         $sprite = $this->storage->getSprite('d-none');
         libxml_use_internal_errors(true); // Отключаем стандартные ошибки libxml
-        $this->dom->loadXML('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24">
+        $someSvgUseCode = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24">
     <symbol id="icon-active" viewBox="0 0 24 24">
         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2z"/>
     </symbol>
     <symbol id="icon-inactive" viewBox="0 0 24 24">
         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2z"/>
     </symbol>
-</svg>');
+</svg';
+       // $this->dom->loadXML();
 
+        $svg = simplexml_load_string($someSvgUseCode);
+
+       $svg->rewind();
         libxml_clear_errors(); // Очищаем ошибки libxml
-        if ($this->dom->validate()) {
+        if ($svg->valid()) {
             echo 'VALIDEN';
         } else {
             echo 'NE VALIDEN';
@@ -108,7 +112,6 @@ class SvgStorageTest extends TestCase
     public function testSvgUseHref(): void
     {
         $someSvgUseCode = $this->storage->get('svg-first');
-
         $this->dom->loadXML($someSvgUseCode);
         /** @var DOMNode $svgNode */
         $svgNode = $this->dom->getElementsByTagName('svg')->item(0);
