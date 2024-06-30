@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace SvgReuser\Tests\Unit;
 
 use DOMDocument;
+use DOMElement;
 use DOMNode;
+use DOMText;
 use PHPUnit\Framework\TestCase;
+use SvgReuser\SvgException;
 use SvgReuser\SvgStorage;
 
 class SvgStorageTest extends TestCase
@@ -16,112 +19,147 @@ class SvgStorageTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->dom = new DOMDocument(encoding: 'UTF-8');
+        $this->dom = new DOMDocument();
         $this->storage = new SvgStorage();
-
-        $svgFirstContent = $this->getSvgContent('svg-first.svg');
-        $svgSecondContent = $this->getSvgContent('svg-second.svg');
-
-        $this->storage->add('svg-first', $svgFirstContent);
-        $this->storage->add('svg-second', $svgSecondContent);
     }
 
-    protected function getSvgContent($filename): string
+    public function testIsValidLoadSprite(): void
     {
-        $filePath = __DIR__ . "/../resources/images/{$filename}";
-
-        return file_get_contents($filePath);
+        try {
+            $this->storage->loadSprite('../resources/images/sprite.svg');
+            $this->assertTrue(true);
+        } catch (SvgException $e) {
+            $this->fail($e->getMessage());
+        }
     }
 
-    public function testIsValidSvgSprite(): void
+    public function testIsValidSpriteStructure(): void
     {
-        $sprite = $this->storage->getSprite('d-none');
+        $this->storage->loadSprite('../resources/images/sprite.svg');
+
+        ob_start();
+        $this->storage->showSprite(false);
+        $content = ob_get_clean();
+
+        $this->dom->preserveWhiteSpace = false;
         $this->dom->validateOnParse = true;
-        $this->dom->loadXML('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24">
-    <symbol id="icon-active" viewBox="0 0 24 24">
-        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2z"/>
-    </symbol>
-    <symbol id="icon-inactive" viewBox="0 0 24 24">
-        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2z"/>
-    </symbol>
-</svg>');
+        $this->dom->loadXML($content);
 
-        echo "<pre>";
-        print_r($this->dom->save('test'));
-        echo "</pre>";
-        if ($this->dom->validate()) {
-            echo 'VALIDEN';
+        $svgNode = $this->dom->getElementsByTagName('svg')->item(0);
+        $this->assertsForSvgSprite($svgNode);
+    }
+
+    private function assertsForSvgSprite($svgSpriteNode): void
+    {
+        $this->assertNotNull($svgSpriteNode);
+        /** @var DOMElement $child */
+        foreach ($svgSpriteNode->childNodes as $child) {
+            $this->assertTrue(is_a($child, DOMElement::class));
+            $this->assertSame($child->tagName, 'symbol');
+            $this->assertTrue($child->hasAttribute('id'));
+        }
+    }
+
+    private function assertsForSvgUse(
+        $svgUseNode,
+        string $id,
+        string $overwriteClass = '',
+        string $classFromFile = 'svg-first__class'
+    ): void
+    {
+        $this->assertNotNull($svgUseNode);
+        $this->assertTrue(is_a($svgUseNode, DOMElement::class));
+        $this->assertSame($svgUseNode->tagName, 'svg');
+        if ($overwriteClass !== '') {
+            $this->assertSame($svgUseNode->getAttribute('class'), $overwriteClass);
         } else {
-            echo 'NE VALIDEN';
-            throw new \Exception('ne validen!!');
+            $this->assertSame($svgUseNode->getAttribute('class'), $classFromFile);
         }
 
-        $this->assertTrue($this->dom->validate());
+        $this->assertSame($svgUseNode->childNodes->length, 1);
+        /** @var DOMElement $firstChild */
+        $firstChild = $svgUseNode->firstChild;
+        $this->assertSame($firstChild->tagName, 'use');
+        $this->assertTrue($firstChild->hasAttribute('href'));
+        $this->assertSame($firstChild->getAttribute('href'), "#$id");
     }
 
-    public function testSvgSprite(): void
+    public function testShowOneSvgOnlyById(): void
     {
-        $sprite = $this->storage->getSprite('d-none');
+        $this->storage->loadSprite('../resources/images/sprite.svg');
+        $id = 'svg-first';
 
-        $this->dom->loadXML($sprite);
+        ob_start();
+        $this->storage->showSvg($id);
+        $content = ob_get_clean();
 
-        /** @var DOMNode $svgNode */
-        $svgNode = $this->dom->getElementsByTagName('svg')->item(0);
-        /** @var DOMNode $symbol */
-        $hasNonSymbol = false;
-        foreach($svgNode as $symbol){
-            if ($symbol->nodeName !== 'symbol') {
-                $hasNonSymbol = true;
-                break;
-            }
-        }
+        $this->dom->preserveWhiteSpace = false;
+        $this->dom->validateOnParse = true;
+        $this->dom->loadXML($content);
 
-        $this->assertFalse($hasNonSymbol);
-        $this->assertEquals('d-none', $svgNode->className);
+        /** @var DOMElement $svgUseNode */
+        $svgUseNode = $this->dom->getElementsByTagName('svg')->item(0);
+        $this->assertsForSvgUse($svgUseNode, $id);
     }
 
-    public function testIsValidSvgSpriteSymbol(): void
+    public function testShowOneSvgWithOverwriteClass(): void
     {
-        $sprite = $this->storage->getSprite('d-none');
+        $this->storage->loadSprite('../resources/images/sprite.svg');
+        $id = 'svg-first';
 
-        $this->dom->loadXML($sprite);
+        ob_start();
+        $this->storage->showSvg($id, 'svg-first-overwrite-class');
+        $content = ob_get_clean();
 
-        /** @var DOMNode $svgNode */
-        $svgNode = $this->dom->getElementsByTagName('svg')->item(0);
-        $firstSymbol = $svgNode->firstChild;
+        $this->dom->preserveWhiteSpace = false;
+        $this->dom->validateOnParse = true;
+        $this->dom->loadXML($content);
 
-        $this->assertNotNull($firstSymbol);
+        /** @var DOMElement $svgUseNode */
+        $svgUseNode = $this->dom->getElementsByTagName('svg')->item(0);
+        $this->assertsForSvgUse($svgUseNode, $id, 'svg-first-overwrite-class');
     }
 
-    public function testSvgSpriteSymbol(): void
+    public function testShowAnySvg(): void
     {
-        $sprite = $this->storage->getSprite('d-none');
+        $this->storage->loadSprite('../resources/images/sprite.svg');
+        $ids = ['svg-first', 'svg-second'];
+        ob_start();
+        $this->storage->showSvg($ids[0]);
+        $this->storage->showSvg($ids[1], 'svg-second-overwrite-class');
+        $content = ob_get_clean();
 
-        $this->dom->loadXML($sprite);
+        $this->dom->preserveWhiteSpace = false;
+        $this->dom->validateOnParse = true;
+        $this->dom->loadHTML($content);
 
-        /** @var DOMNode $svgNode */
-        $svgNode = $this->dom->getElementsByTagName('svg')->item(0);
+        /** @var DOMElement $svgUseNode */
+        $svgUseNode = $this->dom->getElementsByTagName('svg')->item(0);
+        $this->assertsForSvgUse($svgUseNode, $ids[0]);
 
-        $firstSymbol = $svgNode->firstChild;
-        $this->assertEquals('symbol', $firstSymbol);
-        $this->assertEquals('svg-first', $firstSymbol->getAttribute('svg-first'));
+        $svgUseNode = $this->dom->getElementsByTagName('svg')->item(1);
+        $this->assertsForSvgUse($svgUseNode, $ids[1], 'svg-second-overwrite-class');
     }
 
-    public function testSvgUseHref(): void
+    public function testShowOptimizedSpriteByOnlyUsedSvg(): void
     {
-        $someSvgUseCode = $this->storage->get('svg-first');
+        $this->storage->loadSprite('../resources/images/sprite.svg');
+        $ids = ['svg-first', 'svg-second'];
+        ob_start();
+        $this->storage->showSvg($ids[0]);
+        $this->storage->showSvg($ids[1]);
+        ob_end_clean();
+        ob_start();
+        $this->storage->showSprite();
+        $content = ob_get_clean();
 
-        $this->dom->loadXML($someSvgUseCode);
-        /** @var DOMNode $svgNode */
-        $svgNode = $this->dom->getElementsByTagName('svg')->item(0);
-        $this->assertNotNull($svgNode);
-        /** @var DOMNode $useNode */
-        $useNode = $svgNode->getElementsByTagName("use")->item(0);
-        $this->assertNotNull($useNode);
+        $this->dom->preserveWhiteSpace = false;
+        $this->dom->validateOnParse = true;
+        $this->dom->loadHTML($content);
 
-        $hrefValue = $useNode->getAttribute('href');
-
-        $this->assertEquals('#svg-first', $hrefValue);
-        $this->assertEquals('svg-first__class', $svgNode->className);
+        /** @var DOMElement $svgUseNode */
+        $svgUseNode = $this->dom->getElementsByTagName('svg')->item(0);
+        $this->assertsForSvgSprite($svgUseNode);
+        $this->assertSame($svgUseNode->childNodes->length, 2);
     }
 }
