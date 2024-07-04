@@ -18,7 +18,11 @@ class SvgSpriteBuilder
     private int $anonymousSymbolCounter = 0;
     private array $allIds = [];
 
-    public function __construct(private readonly string $spriteName)
+    public function __construct(
+        private readonly string $spriteName = 'sprite.svg',
+        protected array $definitionIdOrderedList = [],
+        protected string $symbolPrefix = 'symbol-',
+    )
     {
         $this->fileManager = new FileManager();
         $this->dom = new DomDocument();
@@ -106,13 +110,8 @@ class SvgSpriteBuilder
     {
         $symbol = $svg->ownerDocument->createElement('symbol');
 
-        if ($svg->hasAttribute('id')) {
-            $id = $svg->getAttribute('id');
-        } elseif ($svg->hasAttribute('class')) {
-            $id = str_replace(' ', '_', $svg->getAttribute('class'));
-        } else {
-            $id = sprintf('symbol-%d', ++$this->anonymousSymbolCounter);
-        }
+        $id = $this->makeSymbolId($svg);
+
         if (in_array($id, $this->allIds, true)) {
             return false;
         }
@@ -140,6 +139,49 @@ class SvgSpriteBuilder
         }
 
         return $symbol;
+    }
+
+    protected function makeSymbolId(DOMElement $svg): string
+    {
+        $definitionIdList = $this->definitionIdOrderedList;
+        if (empty($definitionIdList)) {
+            $definitionIdList = DefinitionIdentificationEnum::cases();
+        }
+
+        foreach ($definitionIdList as $definitionId) {
+            $id = match ($definitionId) {
+                DefinitionIdentificationEnum::ID => $svg->hasAttribute('id')
+                    ? $svg->getAttribute('id')
+                    : '',
+                DefinitionIdentificationEnum::HASH => $this->hash($svg->ownerDocument->saveXML($svg)),
+                DefinitionIdentificationEnum::SVG_CLASS => $svg->hasAttribute('class')
+                    ? str_replace(' ', '_',  $svg->getAttribute('class'))
+                    : '',
+                DefinitionIdentificationEnum::ORDINAL => sprintf(
+                    '%s-%d',
+                    $this->symbolPrefix,
+                    ++$this->anonymousSymbolCounter
+                ),
+                default => '',
+            };
+
+            if (!empty($id)) {
+                return $id;
+            }
+        }
+
+        return sprintf(
+            '%s-%d',
+            $this->symbolPrefix,
+            ++$this->anonymousSymbolCounter
+        );
+    }
+
+    protected function hash(string $input): string
+    {
+        $hash = hash('sha256', $input);
+
+        return (string) preg_replace('/[^A-Za-z0-9]/', '', $hash);
     }
 
     /**
