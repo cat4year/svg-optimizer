@@ -131,4 +131,9 @@ class SvgStorage
 
         return $svg;
     }
+
+    public function getSprite(): DOMNode
+    {
+        return $this->sprite;
+    }
 }
