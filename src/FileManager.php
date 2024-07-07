@@ -41,14 +41,13 @@ class FileManager
         return $this->rglob( rtrim($directory, '/') . '/**.svg');
     }
 
-    private function rglob($pattern, $flags = 0) {
+    private function rglob($pattern, $flags = 0): false|array
+    {
         $files = glob($pattern, $flags);
-        foreach (glob(dirname($pattern).'/*', GLOB_ONLYDIR|GLOB_NOSORT) as $dir) {
-            $files = array_merge(
-                [],
-                ...[$files, $this->rglob($dir . "/" . basename($pattern), $flags)]
-            );
+        foreach (glob(dirname($pattern) . '/*', GLOB_ONLYDIR | GLOB_NOSORT) as $dir) {
+            $files = array_merge([], ...[$files, $this->rglob($dir . "/" . basename($pattern), $flags)]);
         }
+
         return $files;
     }
 }
