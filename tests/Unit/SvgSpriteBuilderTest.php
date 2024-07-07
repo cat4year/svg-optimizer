@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SvgReuser\Tests\Unit;
 
 use Exception;
+use SvgReuser\DefinitionIdentificationEnum;
 use SvgReuser\SvgSpriteBuilder;
 
 class SvgSpriteBuilderTest extends AbstractSvg
@@ -14,7 +15,12 @@ class SvgSpriteBuilderTest extends AbstractSvg
     protected function setUp(): void
     {
         parent::setUp();
-        $this->builder = new SvgSpriteBuilder();
+        $this->builder = new SvgSpriteBuilder(definitionIdOrderedList: [
+            DefinitionIdentificationEnum::ID,
+            DefinitionIdentificationEnum::SVG_CLASS,
+            DefinitionIdentificationEnum::ORDINAL,
+            DefinitionIdentificationEnum::HASH,
+        ]);
     }
 
     public function testIsValidBuildSpriteFromFile(): void

@@ -18,8 +18,6 @@ class SvgSpritePageBuilder
 
     public function __construct(
         private readonly string $spriteName = 'sprite.svg',
-        protected array $definitionIdOrderedList = [],
-        protected string $symbolPrefix = 'symbol-',
     )
     {
         $this->fileManager = new FileManager();
@@ -28,14 +26,17 @@ class SvgSpritePageBuilder
     }
 
     /**
-     * @throws DOMException
      * @throws SvgException
      */
     public function buildSpritePage(string $spritePath, string $spritePagePath = ''): void
     {
-        $svgSpritePage = $this->makeSpritePage($spritePath);
+        try {
+            $svgSpritePage = $this->makeSpritePage($spritePath);
+        } catch (DOMException $e) {
+            throw new SvgException('Cannot make sprite page', 0, $e);
+        }
 
-        if (empty($spritePath)) {
+        if (empty($spritePagePath)) {
             $spritePagePath = dirname($spritePath) . '/' . basename($this->spriteName) . '.html';
         }
 
@@ -79,7 +80,6 @@ class SvgSpritePageBuilder
 
     /**
      * @return DOMDocument[]
-     * @throws DOMException
      * @throws SvgException
      */
     private function makeSvgsElements(): array
@@ -94,6 +94,9 @@ class SvgSpritePageBuilder
             $svgDocument = new DOMDocument();
             $svgDocument->loadHTML($svg);
             $svgElement = $svgDocument->getElementsByTagName('svg')->item(0);
+            if ($svgElement === null) {
+                continue;
+            }
             $result[$id] = $this->dom->importNode($svgElement, true);
         }
 
@@ -154,6 +157,9 @@ class SvgSpritePageBuilder
         $style->setAttribute('type', 'text/css');
         $text = $this->dom->createTextNode('
         table { border: 1px solid black; text-align: center; min-width: 480px; }
+        tr td:last-child {
+           background-image: linear-gradient(black, white);
+        }
         td { border: 1px solid black; min-width: 80px; width: 50%}
         th { border: 1px solid black; }
         ');
@@ -168,6 +174,7 @@ class SvgSpritePageBuilder
     {
         $body = $this->dom->createElement('body');
         $this->dom->appendChild($body);
+
         return $body;
     }
 }
