@@ -106,13 +106,13 @@ class SvgSpriteBuilder
         $fromDocument->formatOutput = true;
         $fromDocument->preserveWhiteSpace = false;
         $fromDocument->validateOnParse = true;
+        libxml_use_internal_errors(true);
         if ($xml) {
-            libxml_use_internal_errors(true);
             $fromDocument->loadXML($content);
-            libxml_clear_errors();
         } else {
             $fromDocument->loadHTML($content);
         }
+        libxml_clear_errors();
 
         $svgNodes = $fromDocument->getElementsByTagName('svg');
         $this->appendCorrectSvgFromSymbolToDocument($svgNodes, $spriteNode);
