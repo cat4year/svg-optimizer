@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace SvgReuser;
 
 use DOMDocument;
+use DOMElement;
 use DOMNode;
 use SvgReuser\Manager\SvgDisplayManager;
 use SvgReuser\Manager\SvgDomManager;
 
 class SvgStorage
 {
-    private DOMNode $sprite;
+    private DOMElement $sprite;
     private FileManager $fileManager;
     private DOMDocument $spriteDocument;
     private SvgDomManager $svgDomManager;
@@ -38,17 +39,20 @@ class SvgStorage
         $this->spriteDocument->loadXML($svg);
         libxml_clear_errors();
         $spriteNode = $this->spriteDocument->getElementsByTagName('svg')->item(0);
-        if (null === $spriteNode) {
+        if (null === $spriteNode || $spriteNode->nodeType !== XML_ELEMENT_NODE) {
             throw new SvgException('Loaded sprite incorrect');
         }
+        /** @var DOMElement $spriteNode */
         $this->sprite = $spriteNode;
     }
 
-    public function showSprite(bool $onlyUsed = true): void
+    public function showSprite(bool $onlyUsed = true, string $class = ''): void
     {
         if ($onlyUsed === true) {
             $this->svgDomManager->removeUnusedSymbols($this->sprite, $this->ids);
         }
+
+        $this->svgDisplayManager->getElementWithClassOverwritten($this->sprite, $class);
 
         echo $this->spriteDocument->saveXML();
     }

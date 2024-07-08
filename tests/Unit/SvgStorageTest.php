@@ -35,6 +35,23 @@ class SvgStorageTest extends AbstractSvg
         $this->assertsForSvgSprite($svgNode);
     }
 
+    public function testIsValidSpriteClassOverwritten(): void
+    {
+        $this->storage->loadSprite(dirname(__DIR__) . '/resources/images/sprite.svg');
+
+        ob_start();
+        $this->storage->showSprite(false, 'd-none');
+        $content = ob_get_clean();
+
+        $this->dom->preserveWhiteSpace = false;
+        $this->dom->validateOnParse = true;
+        $this->dom->loadXML($content);
+
+        /** @var DOMElement $svgNode */
+        $svgNode = $this->dom->getElementsByTagName('svg')->item(0);
+        $this->assertSame($svgNode->getAttribute('class'), 'd-none');
+    }
+
     public function testShowOneSvgOnlyById(): void
     {
         $this->storage->loadSprite(dirname(__DIR__) . '/resources/images/sprite.svg');

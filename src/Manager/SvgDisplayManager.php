@@ -33,16 +33,16 @@ readonly class SvgDisplayManager
 
     public function showBuiltSvg(DOMElement $svg, string $class): void
     {
-        $correctedSvg = $this->getSvgWithClassOverwritten($svg, $class);
+        $correctedSvg = $this->getElementWithClassOverwritten($svg, $class);
         echo $correctedSvg->ownerDocument->saveXML($svg);
     }
 
-    private function getSvgWithClassOverwritten(DOMElement $svg, string $class = ''): DOMElement
+    public function getElementWithClassOverwritten(DOMElement $element, string $class = ''): DOMElement
     {
         if ($class !== '') {
-            $svg->setAttribute('class', $class);
+            $element->setAttribute('class', $class);
         }
 
-        return $svg;
+        return $element;
     }
 }
