@@ -11,7 +11,9 @@ use DOMNode;
 use DOMNodeList;
 use enshrined\svgSanitize\Sanitizer;
 use Exception;
+use SvgReuser\Manager\FileManager;
 use SvgReuser\Manager\SvgDomManager;
+use SvgReuser\Manager\SvgMergeManager;
 
 class SvgSpriteBuilder
 {
@@ -23,8 +25,9 @@ class SvgSpriteBuilder
 
     public function __construct(
         private readonly string $spriteName = 'sprite.svg',
-        protected array $definitionIdOrderedList = [],
-        protected string $symbolPrefix = 'symbol',
+        private array $definitionIdOrderedList = [],
+        private string $symbolPrefix = 'symbol',
+        private string $oldSpritePath = '',
         bool $shouldMinify = true,
     )
     {
@@ -47,6 +50,10 @@ class SvgSpriteBuilder
             $pathTo = $path . '/' . $this->spriteName;
         }
 
+        if ($this->oldSpritePath !== '') {
+            $svgSprite = $this->mergeWithOldSprite($svgSprite);
+        }
+
         $this->fileManager->saveToFile($pathTo, $svgSprite);
     }
 
@@ -63,7 +70,25 @@ class SvgSpriteBuilder
             $pathTo = dirname($pathFrom) . '/' . $this->spriteName;
         }
 
+        if ($this->oldSpritePath !== '') {
+            $svgSprite = $this->mergeWithOldSprite($svgSprite);
+        }
+
         $this->fileManager->saveToFile($pathTo, $svgSprite);
+    }
+
+    /**
+     * @throws SvgException
+     */
+    private function mergeWithOldSprite(string $svgSpriteContent): string
+    {
+        $oldSprite = $this->fileManager->getFromFile($this->oldSpritePath);
+
+        $this->sanitize($oldSprite);
+
+        $resultSprite = (new SvgMergeManager($oldSprite, $svgSpriteContent))->mergeSprites();
+
+        return $this->sanitize($resultSprite);
     }
 
     /**
@@ -190,9 +215,7 @@ class SvgSpriteBuilder
 
         foreach ($definitionIdList as $definitionId) {
             $id = match ($definitionId) {
-                DefinitionIdentificationEnum::ID => $svg->hasAttribute('id')
-                    ? $svg->getAttribute('id')
-                    : '',
+                DefinitionIdentificationEnum::ID => $this->getCorrectIdIfExist($svg),
                 DefinitionIdentificationEnum::HASH => $this->hash($svg->ownerDocument->saveXML($svg)),
                 DefinitionIdentificationEnum::SVG_CLASS => $svg->hasAttribute('class')
                     ? str_replace(' ', '_',  $svg->getAttribute('class'))
@@ -215,6 +238,21 @@ class SvgSpriteBuilder
             $this->symbolPrefix,
             ++$this->anonymousSymbolCounter
         );
+    }
+
+    private function getCorrectIdIfExist(DOMElement $svg): string
+    {
+        if ($svg->hasAttribute('id')) {
+            $nativeId = $svg->getAttribute('id');
+            if (str_starts_with($nativeId, $this->symbolPrefix)) {
+                $symbolNumber = (int) str_replace($this->symbolPrefix . '-', '', $nativeId);
+                if ($symbolNumber > $this->anonymousSymbolCounter) {
+                    $this->anonymousSymbolCounter = $symbolNumber;
+                }
+            }
+        }
+
+        return '';
     }
 
     protected function hash(string $input): string

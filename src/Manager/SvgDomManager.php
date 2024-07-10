@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SvgReuser\Manager;
 
+use DOMAttr;
 use DOMDocument;
 use DOMElement;
 use DOMException;
@@ -13,6 +14,30 @@ use SvgReuser\SvgException;
 
 class SvgDomManager
 {
+    /**
+     * @throws SvgException
+     */
+    public function loadCleanSvg(string $content, ?DOMDocument $document = null): DOMElement
+    {
+        if (null === $document) {
+            $document = new DOMDocument();
+        }
+
+        $document->validateOnParse = true;
+        $document->preserveWhiteSpace = false;
+        libxml_use_internal_errors(true);
+        $document->loadXML($content);
+        libxml_clear_errors();
+
+        $spriteNode = $document->getElementsByTagName('svg')->item(0);
+        if (null === $spriteNode || $spriteNode->nodeType !== XML_ELEMENT_NODE) {
+            throw new SvgException('Loaded sprite incorrect');
+        }
+
+        /** @var DOMElement $spriteNode */
+        return $spriteNode;
+    }
+
     public function removeUnusedSymbols(DomNode $sprite, array $ids): void
     {
         /** @var DOMElement $symbol */
@@ -107,9 +132,56 @@ class SvgDomManager
         $document->preserveWhiteSpace = false;
         $document->validateOnParse = true;
         libxml_use_internal_errors(true);
-        $document->loadXML($xmlContent);
+        $document->loadXML($xmlContent, LIBXML_NOBLANKS);
+        $document->C14N(true);
         libxml_clear_errors();
 
         return $document;
+    }
+
+    public function isEqualElements(DOMELement $firstElement, DOMELement $secondElement): bool
+    {
+        if ($firstElement->childNodes->count() !== $secondElement->childNodes->count()) {
+            return false;
+        }
+
+        return $this->cleanXmlElementStringForCompare($firstElement) === $this->cleanXmlElementStringForCompare($secondElement);
+    }
+
+    private function cleanXmlElementStringForCompare(DOMElement $element): string
+    {
+        /** @var DOMAttr $attribute */
+        foreach ($element->attributes as $attribute) {
+            $element->removeAttribute($attribute->name);
+        }
+
+        $element->removeAttributeNS('http://www.w3.org/2000/svg', $element->nodeName);
+        $element->removeAttribute('xmlns');
+
+        $elementString = $element->ownerDocument->saveXml($element);
+        $elementString = str_replace('xmlns="http://www.w3.org/2000/svg"', '', $elementString);
+
+        return preg_replace('/[\s\t\n\r]/u', '', $elementString);
+    }
+
+    public function findAndSetLastOrderNumber(DOMElement $svg, string $prefix, int &$lastNumber): int
+    {
+        $symbols = $svg->getElementsByTagName('symbol');
+        /** @var DOMElement $symbol */
+        foreach ($symbols as $symbol) {
+            if ($symbol->nodeType !== XML_ELEMENT_NODE) {
+                continue;
+            }
+
+            $id = $symbol->getAttribute('id');
+            if (str_starts_with($id, $prefix)) {
+                $symbolNumber = (int) str_replace($prefix . '-', '', $id);
+                if ($symbolNumber > $lastNumber) {
+                    $lastNumber = $symbolNumber;
+                }
+            }
+        }
+
+        return $lastNumber;
     }
 }

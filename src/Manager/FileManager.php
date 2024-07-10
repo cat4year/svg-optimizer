@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
-namespace SvgReuser;
+namespace SvgReuser\Manager;
+
+use SvgReuser\SvgException;
 
 class FileManager
 {

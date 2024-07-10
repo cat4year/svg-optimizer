@@ -7,14 +7,15 @@ namespace SvgReuser;
 use DOMDocument;
 use DOMElement;
 use DOMException;
+use SvgReuser\Manager\FileManager;
 
 class SvgSpritePageBuilder
 {
     private FileManager $fileManager;
 
-    protected DomDocument $dom;
+    private DomDocument $dom;
 
-    protected SvgStorage $storage;
+    private SvgStorage $storage;
 
     public function __construct(
         private readonly string $spriteName = 'sprite.svg',

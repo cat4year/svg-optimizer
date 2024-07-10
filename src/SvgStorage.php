@@ -7,6 +7,7 @@ namespace SvgReuser;
 use DOMDocument;
 use DOMElement;
 use DOMNode;
+use SvgReuser\Manager\FileManager;
 use SvgReuser\Manager\SvgDisplayManager;
 use SvgReuser\Manager\SvgDomManager;
 
