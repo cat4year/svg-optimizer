@@ -10,6 +10,7 @@ class FileManager
 {
     /**
      * @throws SvgException
+     * @throws ErrorException
      */
     public function getFromFile(string $filePath): string
     {

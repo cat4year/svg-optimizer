@@ -38,17 +38,23 @@ class SvgDomManager
         return $spriteNode;
     }
 
-    public function removeUnusedSymbols(DomNode $sprite, array $ids): void
+    public function removeUnusedSymbols(DOMNode $sprite, array $ids): void
     {
+        $symbolsToRemove = [];
+
         /** @var DOMElement $symbol */
         foreach ($sprite->childNodes as $symbol) {
             if (!array_key_exists($symbol->getAttribute('id'), $ids)) {
-                $sprite->removeChild($symbol);
+                $symbolsToRemove[] = $symbol;
             }
+        }
+
+        foreach ($symbolsToRemove as $symbol) {
+            $sprite->removeChild($symbol);
         }
     }
 
-    public function getXpathElementById(string $id, DOMDocument $document): DOMNode|null
+    public function getXpathElementById(string $id, DOMDocument $document): ?DOMNode
     {
         $xpath = new DOMXPath($document);
 
@@ -66,6 +72,21 @@ class SvgDomManager
         $use = $this->createElement($svg->ownerDocument, 'use');
         $this->setAttributesForUseFromSymbol($use, $symbol);
         $svg->appendChild($use);
+
+        return $svg;
+    }
+
+    /**
+     * @throws SvgException
+     */
+    public function changeSymbolToCompleteSvg(DOMDocument $document, DOMElement $symbol): DOMElement
+    {
+        $svg = $this->createSvg($document);
+        $this->setAttributesForSvgFromSymbol($svg, $symbol);
+
+        foreach ($symbol->childNodes as $child) {
+            $this->appendChildNodeFromOtherDocument($svg, $child);
+        }
 
         return $svg;
     }
@@ -103,7 +124,7 @@ class SvgDomManager
     private function setAttributesForSvgFromSymbol(DOMElement $svg, DOMElement $symbol): void
     {
         foreach ($symbol->attributes as $attribute) {
-            if ($attribute->nodeName === 'id') {
+            if ($attribute->nodeName !== 'class') {
                 continue;
             }
 
@@ -114,6 +135,7 @@ class SvgDomManager
     private function setAttributesForUseFromSymbol(DOMElement $use, DOMElement $symbol): void
     {
         $use->setAttribute('href', sprintf('#%s', $symbol->getAttribute('id')));
+        $use->setAttribute('xlink:href', sprintf('#%s', $symbol->getAttribute('id')));
         $use->setAttribute('x', '0');
         $use->setAttribute('y', '0');
     }
@@ -139,7 +161,7 @@ class SvgDomManager
         return $document;
     }
 
-    public function isEqualElements(DOMELement $firstElement, DOMELement $secondElement): bool
+    public function isEqualElements(DOMElement $firstElement, DOMElement $secondElement): bool
     {
         if ($firstElement->childNodes->count() !== $secondElement->childNodes->count()) {
             return false;

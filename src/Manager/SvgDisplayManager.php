@@ -31,10 +31,11 @@ readonly class SvgDisplayManager
         return $this->svgDomManager->changeSymbolToSvg($this->svgDom, $symbol);
     }
 
-    public function showBuiltSvg(DOMElement $svg, string $class): void
+    public function builtSvg(DOMElement $svg, string $class): string
     {
         $correctedSvg = $this->getElementWithClassOverwritten($svg, $class);
-        echo $correctedSvg->ownerDocument->saveXML($svg);
+
+        return $correctedSvg->ownerDocument->saveXML($svg);
     }
 
     public function getElementWithClassOverwritten(DOMElement $element, string $class = ''): DOMElement

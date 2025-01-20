@@ -13,7 +13,7 @@ class SvgSpritePageBuilder
 {
     private FileManager $fileManager;
 
-    private DomDocument $dom;
+    private DOMDocument $dom;
 
     private SvgStorage $storage;
 
@@ -22,7 +22,7 @@ class SvgSpritePageBuilder
     )
     {
         $this->fileManager = new FileManager();
-        $this->dom = new DomDocument();
+        $this->dom = new DOMDocument();
         $this->storage = new SvgStorage();
     }
 
@@ -71,7 +71,7 @@ class SvgSpritePageBuilder
     {
         /** @var DOMElement $symbol */
         $result = [];
-        $sprite = $this->storage->getSprite();
+        $sprite = $this->storage->getSpriteNode();
         foreach ($sprite->childNodes as $symbol) {
             $result[] = $symbol->getAttribute('id');
         }
@@ -90,7 +90,7 @@ class SvgSpritePageBuilder
         $result = [];
         foreach ($symbolsIds as $id) {
             ob_start();
-            $this->storage->showSvg($id);
+            $this->storage->showUseSvg($id);
             $svg = ob_get_clean();
             $svgDocument = new DOMDocument();
             $svgDocument->loadHTML($svg);

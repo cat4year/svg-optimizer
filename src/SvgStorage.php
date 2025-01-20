@@ -7,6 +7,7 @@ namespace SvgReuser;
 use DOMDocument;
 use DOMElement;
 use DOMNode;
+use ErrorException;
 use SvgReuser\Manager\FileManager;
 use SvgReuser\Manager\SvgDisplayManager;
 use SvgReuser\Manager\SvgDomManager;
@@ -30,6 +31,7 @@ class SvgStorage
 
     /**
      * @throws SvgException
+     * @throws ErrorException
      */
     public function loadSprite(string $spriteFilePath = 'sprite.svg'): void
     {
@@ -47,30 +49,119 @@ class SvgStorage
         $this->sprite = $spriteNode;
     }
 
+    public function isLoadedSprite(): bool
+    {
+        return isset($this->sprite);
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public function getListAllSymbolIds(): array
+    {
+        $resultIds = [];
+        /** @var DOMElement $symbol */
+        $symbols = $this->sprite->childNodes;
+
+        foreach ($symbols as $symbol) {
+            $symbolId = $symbol->getAttribute('id');
+            if (is_string($symbolId)) {
+                $resultIds[] = $symbolId;
+            }
+        }
+
+        return $resultIds;
+    }
+
+    /**
+     * @return array<int, int>
+     */
+    public function getUsedListSymbolIds(): array
+    {
+        return $this->ids;
+    }
+
     public function showSprite(bool $onlyUsed = true, string $class = ''): void
     {
+        echo $this->getSprite($onlyUsed, $class);
+    }
+
+    public function getSprite(bool $onlyUsed = true, string $class = ''): string
+    {
+        if (! isset($this->sprite)) {
+            throw new SvgException('Sprite is not loaded');
+        }
+
         if ($onlyUsed === true) {
             $this->svgDomManager->removeUnusedSymbols($this->sprite, $this->ids);
         }
 
         $this->svgDisplayManager->getElementWithClassOverwritten($this->sprite, $class);
 
-        echo $this->spriteDocument->saveXML();
+        return $this->spriteDocument->saveXML($this->sprite);
     }
 
     /**
      * @throws SvgException
      */
-    public function showSvg(string $id, string $class = ''): void
+    public function showUseSvg(string $id, string $class = ''): void
     {
-        if (!array_key_exists($id, $this->ids)) {
-            $this->ids[$id] = $this->svgDisplayManager->buildSvgForShow($id, $this->spriteDocument);
-        }
-
-        $this->svgDisplayManager->showBuiltSvg($this->ids[$id], $class);
+        echo $this->getUseSvg($id, $class);
     }
 
-    public function getSprite(): DOMNode
+    /**
+     * @throws SvgException
+     */
+    public function getUseSvg(string $id, string $class = ''): string
+    {
+        $this->makeUseSvg($id);
+
+        return $this->svgDisplayManager->builtSvg($this->ids[$id], $class);
+    }
+
+    /**
+     * @throws SvgException
+     */
+    public function makeUseSvg($id): void
+    {
+        if (! isset($this->sprite)) {
+            throw new SvgException('Sprite is not loaded');
+        }
+
+        if (! array_key_exists($id, $this->ids)) {
+            $this->ids[$id] = $this->svgDisplayManager->buildSvgForShow($id, $this->spriteDocument);
+        }
+    }
+
+    /**
+     * @throws SvgException
+     */
+    public function getCompleteSvg(string $id): string
+    {
+        $completeSvg = $this->buildCompleteSvg($id, $this->spriteDocument);
+
+        return $completeSvg->ownerDocument->saveXML($completeSvg);
+    }
+
+    /**
+     * @throws SvgException
+     */
+    public function buildCompleteSvg(string $id, DOMDocument $spriteDom): DOMElement
+    {
+        if (! isset($this->sprite)) {
+            throw new SvgException('Sprite is not loaded');
+        }
+
+        $symbol = $this->svgDomManager->getXpathElementById($id, $spriteDom);
+
+        if ($symbol === null || ! is_a($symbol, DOMElement::class)) {
+            throw new SvgException("Symbol with id $id not found");
+        }
+
+        return $this->svgDomManager->changeSymbolToCompleteSvg(new DOMDocument, $symbol);
+    }
+
+    public function getSpriteNode(): DOMNode
     {
         return $this->sprite;
     }

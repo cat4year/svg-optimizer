@@ -58,6 +58,34 @@ class SvgSpriteBuilder
     }
 
     /**
+     * @param array<int, string> $paths
+     *
+     * @throws DOMException
+     * @throws SvgException
+     */
+    public function buildSpriteFromPaths(array $paths, string $pathTo): void
+    {
+        $svgSprite = $this->makeSvgSpriteFromFiles($paths, static function (string|int $key, $value, string &$fileContent): void {
+            if (! is_numeric($key)) {
+                $doc = new DOMDocument;
+                $doc->loadXML($fileContent);
+                $svg = $doc->getElementsByTagName('svg')->item(0);
+                if ($svg !== null) {
+                    $svg->setAttribute('id', $key);
+                }
+            }
+
+            $fileContent = $svg->ownerDocument->saveXML($svg) ?: '';
+        });
+
+        if ($this->oldSpritePath !== '') {
+            $svgSprite = $this->mergeWithOldSprite($svgSprite);
+        }
+
+        $this->fileManager->saveToFile($pathTo, $svgSprite);
+    }
+
+    /**
      * @throws Exception
      */
     public function buildSpriteFromFile(string $pathFrom, string $pathTo = ''): void
@@ -152,8 +180,10 @@ class SvgSpriteBuilder
      */
     private function appendCorrectSvgFromSymbolToDocument(DOMNodeList $svgNodes, DOMNode $targetSpriteNode): void
     {
-        /** @var DOMElement $svgNode */
         foreach ($svgNodes as $svgNode) {
+            if (! $svgNode instanceof DOMElement) {
+                continue;
+            }
             $svgContent = $this->getValidSvg($svgNode);
             $correctSvgNodeDocument = new DOMDocument();
             $this->svgDomManger->loadCleanXml($correctSvgNodeDocument, $svgContent);
@@ -198,8 +228,12 @@ class SvgSpriteBuilder
         }
 
         foreach ($svg->childNodes as $child) {
-            if (false === $this->checkAndAppendChild($symbol, $child)) {
-                return false;
+            if ($child instanceof DOMElement) {
+                if ($this->checkAndAppendChild($symbol, $child) === false) {
+                    return false;
+                }
+            } else {
+                $this->svgDomManger->appendChildNodeFromOtherDocument($symbol, $child);
             }
         }
 
@@ -266,16 +300,21 @@ class SvgSpriteBuilder
      * @throws DOMException
      * @throws Exception
      */
-    private function makeSvgSpriteFromFiles(array $filesPaths): string
+    private function makeSvgSpriteFromFiles(array $filesPaths, ?callable $resolveId = null): string
     {
         $this->resetBeforeMakeSprite();
         $resultSvgSpriteNode = $this->svgDomManger->createSvg(new DOMDocument());
 
-        foreach ($filesPaths as $svgFilePath) {
+        foreach ($filesPaths as $key => $svgFilePath) {
             if (basename($svgFilePath) === $this->spriteName) {
                 continue;
             }
+
             $fileContent = $this->fileManager->getFromFile($svgFilePath);
+
+            if ($resolveId !== null) {
+                $resolveId($key, $svgFilePath, $fileContent);
+            }
 
             $this->appendAllCorrectSvgFromFileToSprite($fileContent, $resultSvgSpriteNode);
         }
