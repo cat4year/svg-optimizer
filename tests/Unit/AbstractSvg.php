@@ -33,19 +33,13 @@ abstract class AbstractSvg extends TestCase
     }
 
     /**
-     * @param $svgUseNode
-     * @param string $id
-     * @param string $overwriteClass
-     * @param string $classFromFile
-     * @return void
      */
     protected function assertsForSvgUse(
         $svgUseNode,
         string $id,
         string $overwriteClass = '',
         string $classFromFile = 'svg-first__class'
-    ): void
-    {
+    ): void {
         $this->assertNotNull($svgUseNode);
         $this->assertTrue(is_a($svgUseNode, DOMElement::class));
         $this->assertSame($svgUseNode->tagName, 'svg');

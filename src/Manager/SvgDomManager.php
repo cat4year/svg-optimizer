@@ -12,7 +12,7 @@ use DOMNode;
 use DOMXPath;
 use SvgReuser\SvgException;
 
-class SvgDomManager
+final class SvgDomManager
 {
     /**
      * @throws SvgException
@@ -143,8 +143,7 @@ class SvgDomManager
     public function appendChildNodeFromOtherDocument(
         DOMNode $targetElement,
         DOMNode $otherDocumentElement,
-    ): DOMNode
-    {
+    ): DOMNode {
         return $targetElement->appendChild($targetElement->ownerDocument->importNode($otherDocumentElement, true));
     }
 

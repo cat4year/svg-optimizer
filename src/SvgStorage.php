@@ -12,7 +12,7 @@ use SvgReuser\Manager\FileManager;
 use SvgReuser\Manager\SvgDisplayManager;
 use SvgReuser\Manager\SvgDomManager;
 
-class SvgStorage
+final class SvgStorage
 {
     private DOMElement $sprite;
     private FileManager $fileManager;
@@ -158,7 +158,7 @@ class SvgStorage
             throw new SvgException("Symbol with id $id not found");
         }
 
-        return $this->svgDomManager->changeSymbolToCompleteSvg(new DOMDocument, $symbol);
+        return $this->svgDomManager->changeSymbolToCompleteSvg(new DOMDocument(), $symbol);
     }
 
     public function getSpriteNode(): DOMNode

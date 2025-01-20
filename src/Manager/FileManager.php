@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace SvgReuser\Manager;
 
+use ErrorException;
 use SvgReuser\SvgException;
 
-class FileManager
+final class FileManager
 {
     /**
      * @throws SvgException
@@ -41,7 +42,7 @@ class FileManager
 
     public function collectSvgFiles(string $directory): array
     {
-        return $this->rglob( rtrim($directory, '/') . '/**.svg');
+        return $this->rglob(rtrim($directory, '/') . '/**.svg');
     }
 
     private function rglob($pattern, $flags = 0): false|array

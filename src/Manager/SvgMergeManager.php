@@ -6,8 +6,9 @@ namespace SvgReuser\Manager;
 
 use DOMElement;
 use SvgReuser\SvgException;
+use DOMDocument;
 
-class SvgMergeManager
+final class SvgMergeManager
 {
     private DOMElement $oldSprite;
     private DOMElement $sprite;
@@ -18,7 +19,6 @@ class SvgMergeManager
     public function __construct(
         private readonly string $oldSpriteContent,
         private readonly string $spriteContent,
-
     ) {
         $this->svgDomManager = new SvgDomManager();
     }
@@ -56,7 +56,7 @@ class SvgMergeManager
 
     private function isExistInSprite(DOMElement $symbol, DOMElement $oldSprite): bool
     {
-        $tempDocumentForCompare = new \DOMDocument();
+        $tempDocumentForCompare = new DOMDocument();
         $symbolCopy = $tempDocumentForCompare->importNode($symbol, true);
 
         $oldSpriteSymbols = $oldSprite->getElementsByTagName('symbol');

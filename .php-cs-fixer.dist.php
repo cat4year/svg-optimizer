@@ -41,7 +41,7 @@ return (new PhpCsFixer\Config())
         //situationally rules
         'single_line_empty_body' => false,
         'ordered_traits' => true,
-        'protected_to_private' => true,
+        'protected_to_private' => false,
         'combine_consecutive_issets' => true,
         'combine_consecutive_unsets' => true,
         'is_null' => true,

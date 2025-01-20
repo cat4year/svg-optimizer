@@ -15,7 +15,7 @@ use SvgReuser\Manager\FileManager;
 use SvgReuser\Manager\SvgDomManager;
 use SvgReuser\Manager\SvgMergeManager;
 
-class SvgSpriteBuilder
+final class SvgSpriteBuilder
 {
     private Sanitizer $sanitizer;
     private FileManager $fileManager;
@@ -29,8 +29,7 @@ class SvgSpriteBuilder
         private string $symbolPrefix = 'symbol',
         private string $oldSpritePath = '',
         bool $shouldMinify = true,
-    )
-    {
+    ) {
         $this->fileManager = new FileManager();
         $this->sanitizer = new Sanitizer();
         $this->svgDomManger = new SvgDomManager();
@@ -67,7 +66,7 @@ class SvgSpriteBuilder
     {
         $svgSprite = $this->makeSvgSpriteFromFiles($paths, static function (string|int $key, $value, string &$fileContent): void {
             if (! is_numeric($key)) {
-                $doc = new DOMDocument;
+                $doc = new DOMDocument();
                 $doc->loadXML($fileContent);
                 $svg = $doc->getElementsByTagName('svg')->item(0);
                 if ($svg !== null) {
@@ -252,7 +251,7 @@ class SvgSpriteBuilder
                 DefinitionIdentificationEnum::ID => $this->getCorrectIdIfExist($svg),
                 DefinitionIdentificationEnum::HASH => $this->hash($svg->ownerDocument->saveXML($svg)),
                 DefinitionIdentificationEnum::SVG_CLASS => $svg->hasAttribute('class')
-                    ? str_replace(' ', '_',  $svg->getAttribute('class'))
+                    ? str_replace(' ', '_', $svg->getAttribute('class'))
                     : '',
                 DefinitionIdentificationEnum::ORDINAL => sprintf(
                     '%s-%d',

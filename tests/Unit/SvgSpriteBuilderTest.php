@@ -8,7 +8,7 @@ use Exception;
 use SvgReuser\DefinitionIdentificationEnum;
 use SvgReuser\SvgSpriteBuilder;
 
-class SvgSpriteBuilderTest extends AbstractSvg
+final class SvgSpriteBuilderTest extends AbstractSvg
 {
     private SvgSpriteBuilder $builder;
 
@@ -26,8 +26,10 @@ class SvgSpriteBuilderTest extends AbstractSvg
     public function testIsValidBuildSpriteFromFile(): void
     {
         try {
-            $this->builder->buildSpriteFromFile(dirname(__DIR__) . '/resources/build/from/dirty-svgs.html',
-                dirname(__DIR__) . '/resources/build/result/sprite-from-file.html',);
+            $this->builder->buildSpriteFromFile(
+                dirname(__DIR__) . '/resources/build/from/dirty-svgs.html',
+                dirname(__DIR__) . '/resources/build/result/sprite-from-file.html',
+            );
             $this->assertTrue(true);
         } catch (Exception $e) {
             $this->fail($e->getMessage());
@@ -37,8 +39,10 @@ class SvgSpriteBuilderTest extends AbstractSvg
     public function testIsValidBuiltSpriteStructureFromFile(): void
     {
         $spriteFromFilePath = dirname(__DIR__) . '/resources/build/result/sprite-from-file.svg';
-        $this->builder->buildSpriteFromFile(dirname(__DIR__) . '/resources/build/from/dirty-svgs.html',
-            $spriteFromFilePath);
+        $this->builder->buildSpriteFromFile(
+            dirname(__DIR__) . '/resources/build/from/dirty-svgs.html',
+            $spriteFromFilePath
+        );
         $this->storage->loadSprite($spriteFromFilePath);
 
         ob_start();

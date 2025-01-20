@@ -9,7 +9,7 @@ use DOMElement;
 use DOMException;
 use SvgReuser\Manager\FileManager;
 
-class SvgSpritePageBuilder
+final class SvgSpritePageBuilder
 {
     private FileManager $fileManager;
 
@@ -19,8 +19,7 @@ class SvgSpritePageBuilder
 
     public function __construct(
         private readonly string $spriteName = 'sprite.svg',
-    )
-    {
+    ) {
         $this->fileManager = new FileManager();
         $this->dom = new DOMDocument();
         $this->storage = new SvgStorage();
@@ -81,6 +80,7 @@ class SvgSpritePageBuilder
 
     /**
      * @return DOMDocument[]
+     *
      * @throws SvgException
      */
     private function makeSvgsElements(): array

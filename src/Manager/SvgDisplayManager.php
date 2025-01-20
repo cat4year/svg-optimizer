@@ -8,7 +8,7 @@ use DOMDocument;
 use DOMElement;
 use SvgReuser\SvgException;
 
-readonly class SvgDisplayManager
+final readonly class SvgDisplayManager
 {
     private DOMDocument $svgDom;
 

@@ -7,7 +7,7 @@ namespace SvgReuser\Tests\Unit;
 use DOMElement;
 use SvgReuser\SvgException;
 
-class SvgStorageTest extends AbstractSvg
+final class SvgStorageTest extends AbstractSvg
 {
     public function testIsValidLoadSprite(): void
     {

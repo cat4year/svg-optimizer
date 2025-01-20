@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace SvgReuser;
 
-class SvgException extends \Exception
+use Exception;
+
+final class SvgException extends Exception
 {
 }
