@@ -58,7 +58,7 @@ final class SvgStorageTest extends AbstractSvg
         $id = 'svg-first';
 
         ob_start();
-        $this->storage->showSvg($id);
+        $this->storage->showUseSvg($id);
         $content = ob_get_clean();
 
         $this->dom->preserveWhiteSpace = false;
@@ -76,7 +76,7 @@ final class SvgStorageTest extends AbstractSvg
         $id = 'svg-first';
 
         ob_start();
-        $this->storage->showSvg($id, 'svg-first-overwrite-class');
+        $this->storage->showUseSvg($id, 'svg-first-overwrite-class');
         $content = ob_get_clean();
 
         $this->dom->preserveWhiteSpace = false;
@@ -93,8 +93,8 @@ final class SvgStorageTest extends AbstractSvg
         $this->storage->loadSprite(dirname(__DIR__) . '/resources/images/sprite.svg');
         $ids = ['svg-first', 'svg-second'];
         ob_start();
-        $this->storage->showSvg($ids[0]);
-        $this->storage->showSvg($ids[1], 'svg-second-overwrite-class');
+        $this->storage->showUseSvg($ids[0]);
+        $this->storage->showUseSvg($ids[1], 'svg-second-overwrite-class');
         $content = ob_get_clean();
 
         $this->dom->preserveWhiteSpace = false;
@@ -114,8 +114,8 @@ final class SvgStorageTest extends AbstractSvg
         $this->storage->loadSprite(dirname(__DIR__) . '/resources/images/sprite.svg');
         $ids = ['svg-first', 'svg-second'];
         ob_start();
-        $this->storage->showSvg($ids[0]);
-        $this->storage->showSvg($ids[1]);
+        $this->storage->showUseSvg($ids[0]);
+        $this->storage->showUseSvg($ids[1]);
         ob_end_clean();
         ob_start();
         $this->storage->showSprite();

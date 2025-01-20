@@ -74,7 +74,7 @@ final class SvgSpriteBuilder
                 }
             }
 
-            $fileContent = $svg->ownerDocument->saveXML($svg) ?: '';
+            $fileContent = $svg?->ownerDocument?->saveXML($svg) ?: $fileContent;
         });
 
         if ($this->oldSpritePath !== '') {
@@ -318,7 +318,7 @@ final class SvgSpriteBuilder
             $this->appendAllCorrectSvgFromFileToSprite($fileContent, $resultSvgSpriteNode);
         }
 
-        $resultSvgText = $resultSvgSpriteNode->ownerDocument->saveXML($resultSvgSpriteNode);
+        $resultSvgText = $resultSvgSpriteNode->ownerDocument?->saveXML($resultSvgSpriteNode);
 
         return $this->sanitize((string) $resultSvgText);
     }

@@ -45,9 +45,7 @@ final class SvgSpriteBuilderTest extends AbstractSvg
         );
         $this->storage->loadSprite($spriteFromFilePath);
 
-        ob_start();
-        $this->storage->showSprite(false);
-        $content = ob_get_clean();
+        $content =  $this->storage->getSprite(false);
 
         $this->dom->preserveWhiteSpace = false;
         $this->dom->validateOnParse = true;
@@ -73,15 +71,57 @@ final class SvgSpriteBuilderTest extends AbstractSvg
         $this->builder->buildSpriteFromDirectory(dirname(__DIR__) . '/resources/build/from/', $spriteFromFilePath);
         $this->storage->loadSprite($spriteFromFilePath);
 
-        ob_start();
-        $this->storage->showSprite(false);
-        $content = ob_get_clean();
+        $content =  $this->storage->getSprite(false);
 
         $this->dom->preserveWhiteSpace = false;
         $this->dom->validateOnParse = true;
         $this->dom->loadXML($content);
 
         $svgNode = $this->dom->getElementsByTagName('svg')->item(0);
+
+        $this->assertsForSvgSprite($svgNode);
+    }
+
+    public function testIsValidBuildSpriteFromPaths(): void
+    {
+        try {
+            $this->builder->buildSpriteFromPaths(
+                [
+                    dirname(__DIR__) . '/resources/build/from/icons/arrow-down.svg',
+                    dirname(__DIR__) . '/resources/build/from/icons/burger-menu.svg',
+                    dirname(__DIR__) . '/resources/build/from/icons/checkbox.svg',
+                    dirname(__DIR__) . '/resources/build/from/icons/icon-phone.svg',
+                ],
+                dirname(__DIR__) . '/resources/build/result/sprite-from-files-paths.svg',
+            );
+            $this->assertTrue(true);
+        } catch (Exception $e) {
+            $this->fail($e->getMessage());
+        }
+    }
+
+    public function testIsValidBuiltSpriteFromPaths(): void
+    {
+        $spriteFromFilePath = dirname(__DIR__) . '/resources/build/result/sprite-from-files-paths.svg';
+        $this->builder->buildSpriteFromPaths(
+            [
+                dirname(__DIR__) . '/resources/build/from/icons/arrow-down.svg',
+                dirname(__DIR__) . '/resources/build/from/icons/burger-menu.svg',
+                dirname(__DIR__) . '/resources/build/from/icons/checkbox.svg',
+                dirname(__DIR__) . '/resources/build/from/icons/icon-phone.svg',
+            ],
+            $spriteFromFilePath,
+        );
+
+        $this->storage->loadSprite($spriteFromFilePath);
+        $content =  $this->storage->getSprite(false);
+
+        $this->dom->preserveWhiteSpace = false;
+        $this->dom->validateOnParse = true;
+        $this->dom->loadXML($content);
+
+        $svgNode = $this->dom->getElementsByTagName('svg')->item(0);
+
         $this->assertsForSvgSprite($svgNode);
     }
 }
