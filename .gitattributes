@@ -1,0 +1,5 @@
+/.github export-ignore
+/src/Sanitizer/InternalSanitizer export-ignore
+/tests export-ignore
+/.gitignore export-ignore
+/example-trouble.html export-ignore
