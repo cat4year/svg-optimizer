@@ -2,11 +2,12 @@
 
 declare(strict_types=1);
 
-namespace SvgReuser\Tests\Unit;
+namespace Cat4year\SvgReuser\Tests\Unit;
 
+use Cat4year\SvgReuser\DefinitionIdentificationEnum;
+use Cat4year\SvgReuser\Sanitizer\InternalSanitizer;
+use Cat4year\SvgReuser\SvgSpriteBuilder;
 use Exception;
-use SvgReuser\DefinitionIdentificationEnum;
-use SvgReuser\SvgSpriteBuilder;
 
 final class SvgSpriteBuilderTest extends AbstractSvg
 {
@@ -15,12 +16,17 @@ final class SvgSpriteBuilderTest extends AbstractSvg
     protected function setUp(): void
     {
         parent::setUp();
-        $this->builder = new SvgSpriteBuilder(definitionIdOrderedList: [
-            DefinitionIdentificationEnum::ID,
-            DefinitionIdentificationEnum::SVG_CLASS,
-            DefinitionIdentificationEnum::ORDINAL,
-            DefinitionIdentificationEnum::HASH,
-        ]);
+        $sanitizer = new InternalSanitizer(true);
+
+        $this->builder = new SvgSpriteBuilder(
+            sanitizer: $sanitizer,
+            definitionIdOrderedList: [
+                DefinitionIdentificationEnum::ID,
+                DefinitionIdentificationEnum::SVG_CLASS,
+                DefinitionIdentificationEnum::ORDINAL,
+                DefinitionIdentificationEnum::HASH,
+            ]
+        );
     }
 
     public function testIsValidBuildSpriteFromFile(): void

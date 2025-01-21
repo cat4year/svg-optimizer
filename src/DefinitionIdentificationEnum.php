@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SvgReuser;
+namespace Cat4year\SvgReuser;
 
 enum DefinitionIdentificationEnum
 {

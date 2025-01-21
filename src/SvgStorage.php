@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace SvgReuser;
+namespace Cat4year\SvgReuser;
 
 use DOMDocument;
 use DOMElement;
 use DOMNode;
 use ErrorException;
-use SvgReuser\Manager\FileManager;
-use SvgReuser\Manager\SvgDisplayManager;
-use SvgReuser\Manager\SvgDomManager;
+use Cat4year\SvgReuser\Manager\FileManager;
+use Cat4year\SvgReuser\Manager\SvgDisplayManager;
+use Cat4year\SvgReuser\Manager\SvgDomManager;
 
 final class SvgStorage
 {
@@ -81,11 +81,17 @@ final class SvgStorage
         return $this->ids;
     }
 
+    /**
+     * @throws SvgException
+     */
     public function showSprite(bool $onlyUsed = true, string $class = ''): void
     {
         echo $this->getSprite($onlyUsed, $class);
     }
 
+    /**
+     * @throws SvgException
+     */
     public function getSprite(bool $onlyUsed = true, string $class = ''): string
     {
         if (! isset($this->sprite)) {

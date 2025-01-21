@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SvgReuser\Manager;
+namespace Cat4year\SvgReuser\Manager;
 
 use DOMAttr;
 use DOMDocument;
@@ -10,7 +10,7 @@ use DOMElement;
 use DOMException;
 use DOMNode;
 use DOMXPath;
-use SvgReuser\SvgException;
+use Cat4year\SvgReuser\SvgException;
 
 final class SvgDomManager
 {

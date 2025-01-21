@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-namespace SvgReuser;
+namespace Cat4year\SvgReuser;
 
 use DOMDocument;
 use DOMElement;
 use DOMException;
-use SvgReuser\Manager\FileManager;
+use Cat4year\SvgReuser\Manager\FileManager;
+use ErrorException;
 
 final class SvgSpritePageBuilder
 {
@@ -26,7 +27,7 @@ final class SvgSpritePageBuilder
     }
 
     /**
-     * @throws SvgException
+     * @throws SvgException|ErrorException
      */
     public function buildSpritePage(string $spritePath, string $spritePagePath = ''): void
     {
@@ -46,6 +47,7 @@ final class SvgSpritePageBuilder
     /**
      * @throws DOMException
      * @throws SvgException
+     * @throws ErrorException
      */
     private function makeSpritePage(string $spritePath): string
     {

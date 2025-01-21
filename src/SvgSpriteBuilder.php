@@ -2,38 +2,35 @@
 
 declare(strict_types=1);
 
-namespace SvgReuser;
+namespace Cat4year\SvgReuser;
 
+use Cat4year\SvgReuser\Manager\FileManager;
+use Cat4year\SvgReuser\Manager\SvgDomManager;
+use Cat4year\SvgReuser\Manager\SvgMergeManager;
+use Cat4year\SvgReuser\Sanitizer\Sanitizer;
 use DOMDocument;
 use DOMElement;
 use DOMException;
 use DOMNode;
 use DOMNodeList;
-use enshrined\svgSanitize\Sanitizer;
 use Exception;
-use SvgReuser\Manager\FileManager;
-use SvgReuser\Manager\SvgDomManager;
-use SvgReuser\Manager\SvgMergeManager;
 
 final class SvgSpriteBuilder
 {
-    private Sanitizer $sanitizer;
     private FileManager $fileManager;
     private SvgDomManager $svgDomManger;
     private int $anonymousSymbolCounter = 0;
     private array $allIds = [];
 
     public function __construct(
+        private readonly Sanitizer $sanitizer,
         private readonly string $spriteName = 'sprite.svg',
-        private array $definitionIdOrderedList = [],
-        private string $symbolPrefix = 'symbol',
-        private string $oldSpritePath = '',
-        bool $shouldMinify = true,
+        private readonly array $definitionIdOrderedList = [],
+        private readonly string $symbolPrefix = 'symbol',
+        private readonly string $oldSpritePath = '',
     ) {
         $this->fileManager = new FileManager();
-        $this->sanitizer = new Sanitizer();
         $this->svgDomManger = new SvgDomManager();
-        $this->sanitizer->minify($shouldMinify);
     }
 
     /**

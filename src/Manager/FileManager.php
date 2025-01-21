@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace SvgReuser\Manager;
+namespace Cat4year\SvgReuser\Manager;
 
+use Cat4year\SvgReuser\SvgException;
 use ErrorException;
-use SvgReuser\SvgException;
 
 final class FileManager
 {

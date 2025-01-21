@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace SvgReuser\Tests\Unit;
+namespace Cat4year\SvgReuser\Tests\Unit;
 
 use DOMElement;
-use SvgReuser\SvgException;
+use Cat4year\SvgReuser\SvgException;
 
 final class SvgStorageTest extends AbstractSvg
 {

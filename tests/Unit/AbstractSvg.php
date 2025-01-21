@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace SvgReuser\Tests\Unit;
+namespace Cat4year\SvgReuser\Tests\Unit;
 
 use DOMDocument;
 use DOMElement;
 use PHPUnit\Framework\TestCase;
-use SvgReuser\SvgStorage;
+use Cat4year\SvgReuser\SvgStorage;
 
 abstract class AbstractSvg extends TestCase
 {

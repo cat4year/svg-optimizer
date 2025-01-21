@@ -40,3 +40,10 @@ $storage->showSvg('cartBig', 'cart__big');
 //this method should be called after all calls to showSvg. 
 $storage->showSprite();
 ```
+
+For work need implementation of SvgSanizer with method sanitize().
+Can use:
+
+> enshrined/svg-sanitize but have trouble with psr-4
+
+> rhukster/dom-sanitizer but minify, or pretty need test and fix
