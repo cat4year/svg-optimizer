@@ -1,5 +1,4 @@
 {
-    "version": "1.0.0",
     "name": "cat4year/svg-reuser",
     "description": "A tool to collect and reuse SVG as links",
     "license": "MIT",
