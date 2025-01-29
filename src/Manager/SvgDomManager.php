@@ -82,7 +82,7 @@ final class SvgDomManager
     public function changeSymbolToCompleteSvg(DOMDocument $document, DOMElement $symbol): DOMElement
     {
         $svg = $this->createSvg($document);
-        $this->setAttributesForSvgFromSymbol($svg, $symbol);
+        $this->setAttributesForCompleteSvgSymbol($svg, $symbol);
 
         foreach ($symbol->childNodes as $child) {
             $this->appendChildNodeFromOtherDocument($svg, $child);
@@ -118,6 +118,17 @@ final class SvgDomManager
             return $element;
         } catch (DOMException $e) {
             throw new SvgException($e->getMessage());
+        }
+    }
+
+    private function setAttributesForCompleteSvgSymbol(DOMElement $svg, DOMElement $symbol): void
+    {
+        foreach ($symbol->attributes as $attribute) {
+            if ($attribute->nodeName === 'id') {
+                continue;
+            }
+
+            $svg->setAttribute($attribute->nodeName, $attribute->nodeValue);
         }
     }
 
